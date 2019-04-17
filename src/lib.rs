@@ -23,8 +23,10 @@ mod rsdp_search;
 mod sdt;
 
 pub use crate::aml::AmlError;
+pub use crate::fadt::Fadt;
 pub use crate::madt::MadtError;
 pub use crate::rsdp_search::search_for_rsdp_bios;
+pub use crate::hpet::Hpet;
 
 use crate::aml::AmlValue;
 use crate::interrupt::InterruptModel;
@@ -35,8 +37,8 @@ use core::mem;
 use core::ops::Deref;
 use core::ptr::NonNull;
 
-#[derive(Debug)]
 // TODO: manually implement Debug to print signatures correctly etc.
+#[derive(Debug)]
 pub enum AcpiError {
     RsdpIncorrectSignature,
     RsdpInvalidOemId,
@@ -53,13 +55,14 @@ pub enum AcpiError {
     InvalidMadt(MadtError),
 }
 
+#[derive(Copy, Clone, Debug)]
 #[repr(C, packed)]
-pub(crate) struct GenericAddress {
-    address_space: u8,
-    bit_width: u8,
-    bit_offset: u8,
-    access_size: u8,
-    address: u64,
+pub struct GenericAddress {
+    pub address_space: u8,
+    pub bit_width: u8,
+    pub bit_offset: u8,
+    pub access_size: u8,
+    pub address: u64,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -150,6 +153,9 @@ pub struct Acpi {
     namespace: BTreeMap<String, AmlValue>,
     boot_processor: Option<Processor>,
     application_processors: Vec<Processor>,
+    fadt: Option<Fadt>,
+    hpet: Option<Hpet>,
+
 
     /// ACPI theoretically allows for more than one interrupt model to be supported by the same
     /// hardware. For simplicity and because hardware practically will only support one model, we
@@ -174,6 +180,17 @@ impl Acpi {
     /// The interrupt model supported by this system.
     pub fn interrupt_model<'a>(&'a self) -> &'a Option<InterruptModel> {
         &self.interrupt_model
+    }
+
+
+    /// The FADT table.
+    pub fn fadt<'a>(&'a self) -> &'a Option<Fadt> {
+        &self.fadt
+    }
+
+    /// The HPET table.
+    pub fn hpet<'a>(&'a self) -> &'a Option<Hpet> {
+        &self.hpet
     }
 }
 
@@ -237,6 +254,8 @@ where
         boot_processor: None,
         application_processors: Vec::new(),
         interrupt_model: None,
+        hpet: None,
+        fadt: None,
     };
 
     let header = sdt::peek_at_sdt_header(handler, physical_address);

@@ -37,7 +37,7 @@ use core::{mem, str};
 ///     "SRAT" - System Resource Affinity Table
 ///     "SSDT" - Secondary System Description Table
 ///     "XSDT" - eXtended System Descriptor Table
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 #[repr(C, packed)]
 pub struct SdtHeader {
     signature: [u8; 4],
@@ -162,6 +162,7 @@ where
             let hpet_mapping =
                 handler.map_physical_region::<Hpet>(physical_address, mem::size_of::<Hpet>());
             crate::hpet::parse_hpet(&hpet_mapping)?;
+            acpi.hpet = Some(*hpet_mapping);
             handler.unmap_physical_region(hpet_mapping);
         }
 

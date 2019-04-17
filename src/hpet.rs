@@ -2,14 +2,15 @@ use crate::sdt::SdtHeader;
 use crate::{AcpiError, GenericAddress, PhysicalMapping};
 
 #[repr(C, packed)]
+#[derive(Copy, Clone, Debug)]
 pub struct Hpet {
     header: SdtHeader,
 
-    event_timer_block_id: u32,
-    base_address: GenericAddress,
-    hpet_number: u8,
-    clock_tick_unit: u16,
-    page_protection_oem: u8,
+    pub event_timer_block_id: u32,
+    pub base_address: GenericAddress,
+    pub hpet_number: u8,
+    pub clock_tick_unit: u16,
+    pub page_protection_oem: u8,
 }
 
 pub fn parse_hpet(mapping: &PhysicalMapping<Hpet>) -> Result<(), AcpiError> {
