@@ -13,14 +13,14 @@ pub enum LocalInterruptLine {
     Lint1,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum Polarity {
     SameAsBus,
     ActiveHigh,
     ActiveLow,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum TriggerMode {
     SameAsBus,
     Edge,
@@ -31,7 +31,7 @@ pub enum TriggerMode {
 /// models. For example, if a device is connected to ISA IRQ 0 and IOAPIC input 2, an override will
 /// appear mapping source 0 to GSI 2. Currently these will only be created for ISA interrupt
 /// sources.
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct InterruptSourceOverride {
     pub isa_source: u8,
     pub global_system_interrupt: u32,
